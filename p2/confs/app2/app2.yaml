@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: app2
+  replicas: 3
+  template: 
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: app2
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - mountPath: /usr/share/nginx/html/index.html
+            name: nginx-conf
+            subPath: index.html
+          - mountPath: /usr/share/nginx/html/kube-logo.svg
+            name: nginx-img-conf
+            subPath: kube-logo.svg
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: app2-index-html-configmap
+        - name: nginx-img-conf
+          configMap:
+            name: nginx-kube-logo-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2
+  namespace: default
+  labels:
+    app: app2
+spec:
+  externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:    
+    app: app2
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app2
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: app2.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: app2
+              port:
+                number: 80

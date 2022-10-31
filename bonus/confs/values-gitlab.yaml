@@ -1,0 +1,29 @@
+global:
+  edition: ce
+  ingress:
+    enabled: false
+    configureCertmanager: false
+    tls:
+      enabled: false
+  hosts:
+    externalIP: 142.4.210.147
+    domain: askhalog.space
+    https: true
+    gitlab:
+      name: [MY_GIT_DOMAIN]
+      https: true
+certmanager:
+  install: false
+certmanager-issuer:
+  email: samuelbelondrade@gmail.com
+nginx-ingress:
+  enabled: false
+gitlab-runner:
+  install: false
+postgresql:
+  image:
+    tag: 13.6.0
+gitlab:
+  webservice:
+    minReplicas: 1
+    maxReplicas: 1

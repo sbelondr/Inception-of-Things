@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: [MY_GIT_DOMAIN]-tls
+  namespace: gitlab
+spec:
+  secretName: [MY_GIT_DOMAIN]-tls
+  commonName: [MY_GIT_DOMAIN]
+  dnsNames:
+  - [MY_GIT_DOMAIN]
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer

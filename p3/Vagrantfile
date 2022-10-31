@@ -1,0 +1,42 @@
+Vagrant.configure("2") do |config|
+  # set os
+  config.vm.box = "centos/7"
+  config.vbguest.auto_update = false
+
+  # config ssh
+  config.ssh.insert_key = false
+
+  # global setup VM
+  config.vm.boot_timeout = 600
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.cpus = "2"
+  end
+
+  # setup server
+  config.vm.define "sbelondrS" do |control|
+    control.vm.hostname = "sbelondrS"
+	control.vm.network "private_network", ip: "192.168.42.110"
+
+	control.vm.provider "virtualbox" do |v|
+	  v.name = "sbelondrS"
+    end
+
+	config.vm.provision "file", source: "./confs", destination: "/home/vagrant/confs"
+	config.vm.provision "file", source: "./scripts", destination: "/home/vagrant/scripts"
+
+    # install and config k3s
+    control.vm.provision "shell", inline: <<-SHELL
+		# install docker
+		sudo yum install -y yum-utils
+		sudo yum-config-manager \
+			--add-repo \
+			https://download.docker.com/linux/centos/docker-ce.repo
+		sudo yum -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+		sudo usermod -a -G docker vagrant
+		sudo systemctl start docker
+		su -l vagrant -c "bash /home/vagrant/scripts/install-vagrant.sh"
+    SHELL
+  end
+
+end

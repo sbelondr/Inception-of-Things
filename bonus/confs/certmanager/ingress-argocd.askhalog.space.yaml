@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/issuer: letsencrypt-prod
+    #kubernetes.io/tls-acme: "true"
+    #ingress.kubernetes.io/ssl-redirect: "false"
+  name: ingress-[MY_ARGO_DOMAIN]
+  namespace: argocd
+  labels:
+    app: argocd
+spec:
+  rules:
+  - host: [MY_ARGO_DOMAIN]
+    http:
+      paths:
+      - path: /argocd
+        pathType: Prefix
+        backend:
+          service:
+              name: argocd-server
+              port:
+                number: 80
+  tls:
+  - hosts:
+    - [MY_ARGO_DOMAIN]
+    secretName: [MY_ARGO_DOMAIN]-tls
